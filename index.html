@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣味數學分物遊戲</title>
+    <style>
+        :root {
+            --primary-color: #5c5cce;
+            --primary-hover: #4a4a8a;
+            --bg-color: #f4f5f7;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #eee;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+
+        .progress-bar {
+            color: #666;
+            font-weight: bold;
+        }
+
+        .question-card {
+            background-color: #fafbfe;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .hint-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .visual-area {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .visual-area {
+                flex-direction: column;
+            }
+        }
+
+        .visual-box {
+            flex: 1;
+            background-color: #fafbfe;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .visual-box-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+
+        .emoji-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 28px;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-area input {
+            padding: 10px;
+            width: 80px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-next {
+            background-color: #28a745;
+            display: none;
+        }
+
+        .btn-next:hover {
+            background-color: #218838;
+        }
+
+        .feedback {
+            font-size: 16px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+
+        .correct { color: #28a745; }
+        .wrong { color: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>🔢 數學分物遊戲</h1>
+        <div class="progress-bar" id="progress">第 1 / 4 題</div>
+    </div>
+
+    <div class="question-card">
+        <div class="question-text" id="questionText">載入中...</div>
+        <div class="hint-text" id="hintText"></div>
+    </div>
+
+    <div class="visual-area">
+        <div class="visual-box">
+            <div class="visual-box-title" id="itemTitle">可分配物件</div>
+            <div class="emoji-grid" id="itemGrid"></div>
+        </div>
+        <div class="visual-box">
+            <div class="visual-box-title" id="containerTitle">分配區 / 容器</div>
+            <div class="emoji-grid" id="containerGrid"></div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <label for="answerInput" id="questionLabel">答案：</label>
+        <input type="number" id="answerInput" placeholder="?">
+        <span id="unitText"></span>
+        <button class="btn" id="submitBtn" onclick="checkAnswer()">提交答案</button>
+        <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">下一題 ➔</button>
+    </div>
+
+    <div class="feedback" id="feedbackMsg"></div>
+</div>
+
+<script>
+    // 題庫設計：涵蓋除法進位、無條件捨去、求餘數、乘法總和
+    const questions = [
+        {
+            type: "除法 (最少問題 - 進位)",
+            q: "10人要搭車，每輛計程車坐4人，要載完所有人，最少需要幾輛車？",
+            hint: "提示：最少問題中，我們需要用完所有物件，即使最後一輛車未坐滿。(10 ÷ 4 = 2...2)",
+            itemEmoji: "🧑", itemCount: 10, itemLabel: "乘客",
+            containerEmoji: "🚕", containerCount: 4, containerLabel: "計程車 (示意)",
+            answer: 3,
+            unit: "輛",
+            askText: "最少需要多少輛？"
+        },
+        {
+            type: "除法 (最多裝滿 - 捨去)",
+            q: "有14個蘋果，每個籃子最多裝5個。最多可以裝滿幾個籃子？",
+            hint: "提示：最多問題中，我們只計算完全填滿的容器，剩下的不計。(14 ÷ 5 = 2...4)",
+            itemEmoji: "🍎", itemCount: 14, itemLabel: "蘋果",
+            containerEmoji: "🧺", containerCount: 3, containerLabel: "籃子 (示意)",
+            answer: 2,
+            unit: "個",
+            askText: "最多裝滿多少個籃子？"
+        },
+        {
+            type: "除法 (求餘數)",
+            q: "老師有17顆糖果，平分給3個小朋友，最後會剩下幾顆糖果？",
+            hint: "提示：這是一道求餘數的題目，分不平的就會剩下。(17 ÷ 3 = 5...2)",
+            itemEmoji: "🍬", itemCount: 17, itemLabel: "糖果",
+            containerEmoji: "👦", containerCount: 3, containerLabel: "小朋友",
+            answer: 2,
+            unit: "顆",
+            askText: "剩下多少顆？"
+        },
+        {
+            type: "乘法 (求總數)",
+            q: "桌上有4盒朱古力，每盒裡面有6粒，總共有多少粒朱古力？",
+            hint: "提示：這是一道乘法/加法題目。把所有數量的物件加起來。(4 × 6 = ?)",
+            itemEmoji: "🍫", itemCount: 6, itemLabel: "每盒朱古力數量",
+            containerEmoji: "📦", containerCount: 4, containerLabel: "朱古力盒",
+            answer: 24,
+            unit: "粒",
+            askText: "總共有多少粒？"
+        }
+    ];
+
+    let currentIndex = 0;
+
+    // DOM 元素
+    const elProgress = document.getElementById('progress');
+    const elQuestionText = document.getElementById('questionText');
+    const elHintText = document.getElementById('hintText');
+    const elItemTitle = document.getElementById('itemTitle');
+    const elItemGrid = document.getElementById('itemGrid');
+    const elContainerTitle = document.getElementById('containerTitle');
+    const elContainerGrid = document.getElementById('containerGrid');
+    const elQuestionLabel = document.getElementById('questionLabel');
+    const elAnswerInput = document.getElementById('answerInput');
+    const elUnitText = document.getElementById('unitText');
+    const elSubmitBtn = document.getElementById('submitBtn');
+    const elNextBtn = document.getElementById('nextBtn');
+    const elFeedbackMsg = document.getElementById('feedbackMsg');
+
+    function loadQuestion() {
+        const q = questions[currentIndex];
+        
+        // 更新文字
+        elProgress.innerText = `第 ${currentIndex + 1} / ${questions.length} 題 - ${q.type}`;
+        elQuestionText.innerText = q.q;
+        elHintText.innerText = q.hint;
+        elQuestionLabel.innerText = q.askText;
+        elUnitText.innerText = q.unit;
+        
+        // 更新 Emoji 視覺區塊
+        elItemTitle.innerText = `物件：${q.itemLabel}`;
+        elItemGrid.innerHTML = Array(q.itemCount).fill(q.itemEmoji).join('');
+        
+        elContainerTitle.innerText = `分配區：${q.containerLabel}`;
+        elContainerGrid.innerHTML = Array(q.containerCount).fill(q.containerEmoji).join('');
+
+        // 重置狀態
+        elAnswerInput.value = '';
+        elAnswerInput.disabled = false;
+        elSubmitBtn.style.display = 'inline-block';
+        elNextBtn.style.display = 'none';
+        elFeedbackMsg.innerText = '';
+        elFeedbackMsg.className = 'feedback';
+        
+        elAnswerInput.focus();
+    }
+
+    function checkAnswer() {
+        const userAnswer = parseInt(elAnswerInput.value);
+        const correctAnswer = questions[currentIndex].answer;
+
+        if (isNaN(userAnswer)) {
+            elFeedbackMsg.innerText = "⚠️ 請輸入數字！";
+            elFeedbackMsg.className = 'feedback wrong';
+            return;
+        }
+
+        if (userAnswer === correctAnswer) {
+            elFeedbackMsg.innerText = "🎉 答對了！非常棒！";
+            elFeedbackMsg.className = 'feedback correct';
+            
+            // 答對後鎖定輸入，顯示下一題按鈕
+            elAnswerInput.disabled = true;
+            elSubmitBtn.style.display = 'none';
+            
+            if (currentIndex < questions.length - 1) {
+                elNextBtn.style.display = 'inline-block';
+            } else {
+                elFeedbackMsg.innerText = "🎉 恭喜你完成了所有題目！";
+                elNextBtn.innerText = "重新開始 ↺";
+                elNextBtn.style.display = 'inline-block';
+                elNextBtn.onclick = resetGame;
+            }
+        } else {
+            elFeedbackMsg.innerText = "❌ 答錯了，請再想想看！";
+            elFeedbackMsg.className = 'feedback wrong';
+        }
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        loadQuestion();
+    }
+
+    function resetGame() {
+        currentIndex = 0;
+        elNextBtn.onclick = nextQuestion;
+        elNextBtn.innerText = "下一題 ➔";
+        loadQuestion();
+    }
+
+    // 允許按 Enter 鍵提交
+    elAnswerInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            if (elSubmitBtn.style.display !== 'none') {
+                checkAnswer();
+            } else if (elNextBtn.style.display !== 'none') {
+                elNextBtn.click();
+            }
+        }
+    });
+
+    // 初始化遊戲
+    window.onload = loadQuestion;
+</script>
+
+</body>
+</html>
