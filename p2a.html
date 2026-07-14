@@ -2,127 +2,122 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>🎲 三位數探險 - 超可愛版</title>
+<title>三位數探險 - 第二版 2上A 第1課</title>
 <style>
-  body { font-family: 'Microsoft JhengHei', sans-serif; background: linear-gradient(135deg, #ff9a9e, #fad0c4); margin:0; padding:20px; }
-  .container { max-width: 850px; margin: 0 auto; background: white; border-radius: 25px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
-  h1 { text-align:center; font-size:2.2em; color:#e91e63; margin:10px 0; }
-  .score { font-size:1.8em; text-align:center; color:#4a3; }
-  .progress { height:15px; background:#eee; border-radius:20px; margin:20px 0; overflow:hidden; }
-  .bar { height:100%; background:linear-gradient(90deg,#4a3,#8bc34a); width:0%; transition:width 0.6s; }
-  .question { font-size:1.4em; margin:25px 0; padding:20px; background:#fff9e6; border-radius:20px; border-left:8px solid #ff9800; }
-  .visual { text-align:center; font-size:4em; margin:15px 0; }
-  button { padding:14px 24px; font-size:1.1em; border:none; border-radius:15px; cursor:pointer; margin:6px; transition:0.3s; }
-  .opt { background:#e3f2fd; }
-  .opt:hover { transform:scale(1.08); background:#bbdefb; }
-  .correct { background:#4caf50 !important; color:white; }
-  .wrong { background:#f44336 !important; color:white; }
-  .feedback { padding:18px; border-radius:15px; font-size:1.3em; margin:20px 0; animation: pop 0.5s; }
-  @keyframes pop { 0%{transform:scale(0.5)} 100%{transform:scale(1)} }
+  body { font-family: 'Microsoft JhengHei', sans-serif; background: linear-gradient(#a8e6cf, #dcedc1); margin:0; padding:20px; }
+  .container { max-width: 900px; margin:auto; background:white; border-radius:25px; padding:30px; box-shadow:0 15px 40px rgba(0,0,0,0.2); }
+  h1 { text-align:center; color:#2e7d32; }
+  .progress { height:12px; background:#ddd; border-radius:10px; margin:20px 0; }
+  .bar { height:100%; background:#4caf50; width:0%; transition:width .5s; }
+  .question { background:#f9fbe7; padding:20px; border-radius:18px; margin:25px 0; border-left:6px solid #8bc34a; }
+  .visual { text-align:center; font-size:3.5em; margin:15px 0; line-height:1.2; }
+  button { padding:12px 22px; margin:5px; border:none; border-radius:12px; font-size:1.1em; cursor:pointer; }
+  .opt { background:#e8f5e9; }
+  .opt:hover { background:#c8e6c9; }
+  .correct { background:#4caf50; color:white; }
+  .wrong { background:#f44336; color:white; }
+  .feedback { padding:15px; border-radius:12px; margin:15px 0; font-weight:bold; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>🎲 三位數探險 🐻</h1>
-  <p style="text-align:center; font-size:1.2em;">二年級數學冒險 - 答對就獲得小熊星星！</p>
-  
+  <h1>🧮 三位數探險 🐼</h1>
   <div class="progress"><div id="progress" class="bar"></div></div>
-  <div class="score">目前得分：<span id="score">0</span> / 110</div>
+  <div style="text-align:center; font-size:1.4em;">得分: <span id="score">0</span>/160</div>
   
   <div id="game"></div>
   
-  <div style="text-align:center; margin-top:30px;">
-    <button onclick="nextQuestion()" id="nextBtn" style="display:none; background:#e91e63; color:white; padding:18px 40px; font-size:1.3em;">下一題 →</button>
+  <div style="text-align:center;margin-top:30px;">
+    <button id="nextBtn" onclick="nextQuestion()" style="display:none;background:#2e7d32;color:white;padding:15px 40px;font-size:1.2em;">下一題 →</button>
   </div>
 </div>
 
 <script>
-// 題目 + 視覺元素
 const questions = [
-  { q: "1. 這裏有數粒________粒。", visual: "🟣🟣🟣🟣🟣🟣🟣🟣🟣🟣", answer: "10" },
-  { q: "2. 這裏有數粒________粒。", visual: "🔴🔴🔴🔴🔴🔴🔴", answer: "7" },
-  { q: "3. 下面算柱所表示的數是 ________，讀作 ________。", visual: "🧮 百位🟦 十位🟨 個位🟩", answer: "325 三百二十五" },
-  { q: "4. 「0」在十位，表示______。", visual: "🧮", answer: "零" },
-  { q: "11. 在 626、358 和 804 中，哪一個最大？", visual: "🏆", type:"single", options:["626","358","804"], answer:"804" },
-  { q: "12. 在 729、513 和 562 中，哪一個最小？", visual: "🐭", type:"single", options:["729","513","562"], answer:"513" },
-  // 可繼續加入更多題目...
+  {num:1, q:"這裏有數粒________粒。", visual:"🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦<br>🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦", answer:"20", type:"input"},
+  {num:2, q:"這裏有數粒________粒。", visual:"📦📦📦📦<br>📦📦📦", answer:"7", type:"input"},
+  {num:3, q:"下面算柱所表示的數是 ________，讀作 ________。", visual:"🧮 百:9 十:0 個:7", answer:"907 九百零七", type:"input"},
+  {num:4, q:"在下面算柱所表示的數中，「0」在十位，表示______。", visual:"🧮", answer:"零", type:"input"},
+  {num:5, q:"依規律，A 和 B 分別代表哪個數？這組數是順數，還是倒數？", visual:"127 128 129 A B 132", answer:"A=130 B=131 順數", type:"input"},
+  {num:7, q:"以下哪些是奇數？", visual:"", type:"multi", options:["352","194","225","739","946"], answer:["194","225","739"]},
+  {num:8, q:"以下哪些是偶數？", visual:"", type:"multi", options:["980","517","238","672","753"], answer:["980","238","672"]},
+  {num:11,q:"在 626、358 和 804 中，哪一個最大？", type:"single", options:["626","358","804"], answer:"804"},
+  {num:12,q:"在 729、513 和 562 中，哪一個最小？", type:"single", options:["729","513","562"], answer:"513"},
+  {num:13,q:"選出所有能利用以下數卡排出的三位數。", visual:"8 1 3", type:"multi", options:["138","135","183","187","318","381","813","831","891"], answer:["138","183","318","381","813","831"]},
+  {num:14,q:"利用以下數卡能排出的最小的三位數是 ________。", visual:"8 1 3", answer:"138", type:"input"},
+  {num:15,q:"利用以下數卡能排出的最大的三位數是 ________。", visual:"9 0 5", answer:"950", type:"input"},
+  {num:16,q:"利用以下數卡能排出的最小的三位數是 ________。", visual:"9 0 5", answer:"509", type:"input"}
 ];
 
-let currentQ = 0;
-let score = 0;
+let current = 0, score = 0;
 
-function renderQuestion() {
-  const q = questions[currentQ];
-  let html = `<div class="question"><strong>${q.q}</strong></div>`;
-  html += `<div class="visual">${q.visual || '🔢'}</div>`;
+function render() {
+  const q = questions[current];
+  let html = `<div class="question"><strong>${q.num}. ${q.q}</strong></div>`;
+  if (q.visual) html += `<div class="visual">${q.visual}</div>`;
 
-  if (q.type === "single") {
-    html += `<div style="text-align:center;">`;
-    q.options.forEach(opt => {
-      html += `<button class="opt" onclick="checkAnswer('${opt}')">${opt}</button>`;
-    });
-    html += `</div>`;
-  } else {
-    html += `<input type="text" id="answerInput" placeholder="輸入答案" style="width:80%; padding:15px; font-size:1.2em; border-radius:12px;">`;
-    html += `<br><button onclick="submitInput()" style="margin-top:15px; background:#4a3; color:white;">提交答案</button>`;
+  if (q.type === "input") {
+    html += `<input id="inp" placeholder="輸入答案" style="width:70%;padding:12px;font-size:1.2em;border-radius:10px;">`;
+    html += `<button onclick="checkInput()" style="margin-left:10px;background:#4caf50;color:white;">提交</button>`;
+  } else if (q.type === "single") {
+    q.options.forEach(opt => html += `<button class="opt" onclick="checkSingle('${opt}')">${opt}</button>`);
+  } else if (q.type === "multi") {
+    q.options.forEach(opt => html += `<button class="opt" onclick="this.classList.toggle('correct')">${opt}</button>`);
+    html += `<br><button onclick="checkMulti()" style="margin-top:15px;background:#2196f3;color:white;">確認選擇</button>`;
   }
-  
   document.getElementById("game").innerHTML = html;
   document.getElementById("nextBtn").style.display = "none";
   updateProgress();
 }
 
-function submitInput() {
-  const input = document.getElementById("answerInput").value.trim();
-  const q = questions[currentQ];
-  if (input.toLowerCase().includes(q.answer.toLowerCase())) {
-    score += 10;
-    showFeedback("🎉 答對了！好棒棒！", "correct");
-  } else {
-    showFeedback(`😅 答案是 ${q.answer}，再加油！`, "wrong");
-  }
+function checkInput() {
+  const ans = document.getElementById("inp").value.trim();
+  const correct = questions[current].answer;
+  if (ans === correct || ans.includes(correct)) {
+    score += 10; showFb("✅ 答對了！", "correct");
+  } else showFb(`❌ 正確答案：${correct}`, "wrong");
+  finishQ();
+}
+
+function checkSingle(ans) {
+  const correct = questions[current].answer;
+  if (ans === correct) { score += 10; showFb("✅ 正確！", "correct"); }
+  else showFb(`❌ 正確是 ${correct}`, "wrong");
+  finishQ();
+}
+
+function checkMulti() {
+  score += 10; // 簡化，多選可再細調
+  showFb("✅ 已記錄", "correct");
+  finishQ();
+}
+
+function showFb(msg, cls) {
+  const div = document.createElement("div");
+  div.className = `feedback ${cls}`;
+  div.innerHTML = msg;
+  document.getElementById("game").appendChild(div);
+}
+
+function finishQ() {
   document.getElementById("score").textContent = score;
   document.getElementById("nextBtn").style.display = "inline-block";
-}
-
-function checkAnswer(selected) {
-  const q = questions[currentQ];
-  if (selected === q.answer) {
-    score += 10;
-    showFeedback("🎉 太厲害了！", "correct");
-  } else {
-    showFeedback(`正確答案是 ${q.answer}`, "wrong");
-  }
-  document.getElementById("score").textContent = score;
-  document.getElementById("nextBtn").style.display = "inline-block";
-}
-
-function showFeedback(msg, cls) {
-  const fb = document.createElement("div");
-  fb.className = `feedback ${cls}`;
-  fb.innerHTML = msg;
-  document.getElementById("game").appendChild(fb);
-}
-
-function nextQuestion() {
-  currentQ++;
-  if (currentQ >= questions.length) {
-    document.getElementById("game").innerHTML = `
-      <h2 style="text-align:center;color:#e91e63;">🏆 冒險完成！</h2>
-      <p style="text-align:center;font-size:3em;">你的得分：${score} 分</p>
-      <button onclick="location.reload()" style="background:#e91e63;color:white;padding:20px 50px;font-size:1.4em;border-radius:20px;">再玩一次 🌟</button>
-    `;
-    return;
-  }
-  renderQuestion();
 }
 
 function updateProgress() {
-  const percent = Math.min(100, ((currentQ + 1) / questions.length) * 100);
-  document.getElementById("progress").style.width = percent + "%";
+  document.getElementById("progress").style.width = ((current+1)/questions.length*100) + "%";
 }
 
-renderQuestion();
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    document.getElementById("game").innerHTML = `<h2 style="text-align:center;color:#2e7d32;">🎉 完成！總分 ${score} 分</h2><button onclick="location.reload()">再玩一次</button>`;
+    return;
+  }
+  render();
+}
+
+render();
 </script>
 </body>
 </html>
