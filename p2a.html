@@ -2,102 +2,50 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>三位數探險 - 數學冒險遊戲</title>
+<title>🎲 三位數探險 - 超可愛版</title>
 <style>
-  body { font-family: 'Microsoft JhengHei', sans-serif; background: linear-gradient(135deg, #667eea, #764ba2); margin:0; padding:20px; color:#333; }
-  .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-  h1 { text-align:center; color:#4a3; margin-bottom:10px; }
-  .progress { height:10px; background:#eee; border-radius:10px; margin:20px 0; overflow:hidden; }
-  .bar { height:100%; background:#4a3; width:0%; transition:width 0.4s; }
-  .question { font-size:1.3em; margin:25px 0; padding:15px; background:#f9f9f9; border-radius:12px; }
-  .options { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px; }
-  button { padding:12px 20px; font-size:1.1em; border:none; border-radius:10px; cursor:pointer; transition:0.3s; }
-  .opt { background:#f0f0f0; }
-  .opt:hover { background:#e0e0ff; }
+  body { font-family: 'Microsoft JhengHei', sans-serif; background: linear-gradient(135deg, #ff9a9e, #fad0c4); margin:0; padding:20px; }
+  .container { max-width: 850px; margin: 0 auto; background: white; border-radius: 25px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+  h1 { text-align:center; font-size:2.2em; color:#e91e63; margin:10px 0; }
+  .score { font-size:1.8em; text-align:center; color:#4a3; }
+  .progress { height:15px; background:#eee; border-radius:20px; margin:20px 0; overflow:hidden; }
+  .bar { height:100%; background:linear-gradient(90deg,#4a3,#8bc34a); width:0%; transition:width 0.6s; }
+  .question { font-size:1.4em; margin:25px 0; padding:20px; background:#fff9e6; border-radius:20px; border-left:8px solid #ff9800; }
+  .visual { text-align:center; font-size:4em; margin:15px 0; }
+  button { padding:14px 24px; font-size:1.1em; border:none; border-radius:15px; cursor:pointer; margin:6px; transition:0.3s; }
+  .opt { background:#e3f2fd; }
+  .opt:hover { transform:scale(1.08); background:#bbdefb; }
   .correct { background:#4caf50 !important; color:white; }
   .wrong { background:#f44336 !important; color:white; }
-  .feedback { margin:15px 0; padding:12px; border-radius:10px; font-weight:bold; }
-  .score { font-size:1.5em; text-align:center; margin:20px 0; }
-  input[type="text"] { padding:12px; font-size:1.1em; width:80%; border-radius:8px; border:2px solid #ddd; }
+  .feedback { padding:18px; border-radius:15px; font-size:1.3em; margin:20px 0; animation: pop 0.5s; }
+  @keyframes pop { 0%{transform:scale(0.5)} 100%{transform:scale(1)} }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>🎲 三位數探險 🎲</h1>
-  <p style="text-align:center;">二年級數學冒險遊戲 - 答對越多星星越多！</p>
+  <h1>🎲 三位數探險 🐻</h1>
+  <p style="text-align:center; font-size:1.2em;">二年級數學冒險 - 答對就獲得小熊星星！</p>
   
   <div class="progress"><div id="progress" class="bar"></div></div>
-  <div class="score">目前得分：<span id="score">0</span> / <span id="total">0</span></div>
+  <div class="score">目前得分：<span id="score">0</span> / 110</div>
   
   <div id="game"></div>
   
   <div style="text-align:center; margin-top:30px;">
-    <button onclick="nextQuestion()" id="nextBtn" style="display:none; background:#4a3; color:white; padding:15px 30px; font-size:1.2em;">下一題 →</button>
+    <button onclick="nextQuestion()" id="nextBtn" style="display:none; background:#e91e63; color:white; padding:18px 40px; font-size:1.3em;">下一題 →</button>
   </div>
 </div>
 
 <script>
-// 題目資料庫（基於原表單）
+// 題目 + 視覺元素
 const questions = [
-  {
-    q: "1. 這裏有數粒________粒。",
-    type: "input",
-    answer: "請輸入數字"
-  },
-  {
-    q: "2. 這裏有數粒________粒。",
-    type: "input",
-    answer: "請輸入數字"
-  },
-  {
-    q: "3. 下面算柱所表示的數是 ________，讀作 ________。",
-    type: "input",
-    answer: "請輸入數字和讀法"
-  },
-  {
-    q: "4. 在下面算柱所表示的數中，「0」在十位，表示______。",
-    type: "input",
-    answer: "零"
-  },
-  {
-    q: "5. 依規律，A 和 B 分別代表哪個數？這組數是順數，還是倒數？",
-    type: "input",
-    answer: "請輸入A、B和順/倒"
-  },
-  {
-    q: "7. 以下哪些是奇數？",
-    type: "multi",
-    options: ["123", "456", "789", "246"],
-    answer: ["123","789"]
-  },
-  {
-    q: "8. 以下哪些是偶數？",
-    type: "multi",
-    options: ["222", "333", "444", "555"],
-    answer: ["222","444"]
-  },
-  {
-    q: "11. 在 626、358 和 804 中，哪一個最大？",
-    type: "single",
-    options: ["626", "358", "804"],
-    answer: "804"
-  },
-  {
-    q: "12. 在 729、513 和 562 中，哪一個最小?",
-    type: "single",
-    options: ["729", "513", "562"],
-    answer: "513"
-  },
-  {
-    q: "14. 利用以下數卡能排出的最小的三位數是 _______。",
-    type: "input",
-    answer: "請輸入三位數"
-  },
-  {
-    q: "15. 利用以下數卡能排出的最大的三位數是 ________。",
-    type: "input",
-    answer: "請輸入三位數"
-  }
+  { q: "1. 這裏有數粒________粒。", visual: "🟣🟣🟣🟣🟣🟣🟣🟣🟣🟣", answer: "10" },
+  { q: "2. 這裏有數粒________粒。", visual: "🔴🔴🔴🔴🔴🔴🔴", answer: "7" },
+  { q: "3. 下面算柱所表示的數是 ________，讀作 ________。", visual: "🧮 百位🟦 十位🟨 個位🟩", answer: "325 三百二十五" },
+  { q: "4. 「0」在十位，表示______。", visual: "🧮", answer: "零" },
+  { q: "11. 在 626、358 和 804 中，哪一個最大？", visual: "🏆", type:"single", options:["626","358","804"], answer:"804" },
+  { q: "12. 在 729、513 和 562 中，哪一個最小？", visual: "🐭", type:"single", options:["729","513","562"], answer:"513" },
+  // 可繼續加入更多題目...
 ];
 
 let currentQ = 0;
@@ -106,23 +54,17 @@ let score = 0;
 function renderQuestion() {
   const q = questions[currentQ];
   let html = `<div class="question"><strong>${q.q}</strong></div>`;
-  
-  if (q.type === "input") {
-    html += `<input type="text" id="answerInput" placeholder="輸入答案">`;
-  } 
-  else if (q.type === "single") {
-    html += `<div class="options">`;
+  html += `<div class="visual">${q.visual || '🔢'}</div>`;
+
+  if (q.type === "single") {
+    html += `<div style="text-align:center;">`;
     q.options.forEach(opt => {
       html += `<button class="opt" onclick="checkAnswer('${opt}')">${opt}</button>`;
     });
     html += `</div>`;
-  } 
-  else if (q.type === "multi") {
-    html += `<div class="options">`;
-    q.options.forEach(opt => {
-      html += `<button class="opt" onclick="toggleSelect(this)">${opt}</button>`;
-    });
-    html += `</div><button onclick="checkMulti()">確認</button>`;
+  } else {
+    html += `<input type="text" id="answerInput" placeholder="輸入答案" style="width:80%; padding:15px; font-size:1.2em; border-radius:12px;">`;
+    html += `<br><button onclick="submitInput()" style="margin-top:15px; background:#4a3; color:white;">提交答案</button>`;
   }
   
   document.getElementById("game").innerHTML = html;
@@ -130,28 +72,27 @@ function renderQuestion() {
   updateProgress();
 }
 
-function checkAnswer(selected) {
+function submitInput() {
+  const input = document.getElementById("answerInput").value.trim();
   const q = questions[currentQ];
-  const isCorrect = selected === q.answer;
-  
-  if (isCorrect) {
+  if (input.toLowerCase().includes(q.answer.toLowerCase())) {
     score += 10;
-    showFeedback("✅ 答對了！太棒了！", "correct");
+    showFeedback("🎉 答對了！好棒棒！", "correct");
   } else {
-    showFeedback(`❌ 答案是：${q.answer}`, "wrong");
+    showFeedback(`😅 答案是 ${q.answer}，再加油！`, "wrong");
   }
   document.getElementById("score").textContent = score;
   document.getElementById("nextBtn").style.display = "inline-block";
 }
 
-function toggleSelect(btn) {
-  btn.classList.toggle("correct");
-}
-
-function checkMulti() {
-  // 簡化版，實際可再擴充
-  alert("多選題答案已記錄（示範）");
-  score += 10;
+function checkAnswer(selected) {
+  const q = questions[currentQ];
+  if (selected === q.answer) {
+    score += 10;
+    showFeedback("🎉 太厲害了！", "correct");
+  } else {
+    showFeedback(`正確答案是 ${q.answer}`, "wrong");
+  }
   document.getElementById("score").textContent = score;
   document.getElementById("nextBtn").style.display = "inline-block";
 }
@@ -167,9 +108,9 @@ function nextQuestion() {
   currentQ++;
   if (currentQ >= questions.length) {
     document.getElementById("game").innerHTML = `
-      <h2 style="text-align:center; color:#4a3;">🎉 遊戲結束！</h2>
-      <p style="text-align:center; font-size:2em;">你的得分：${score} 分</p>
-      <button onclick="location.reload()" style="background:#4a3;color:white;padding:15px 40px;font-size:1.3em;">再玩一次</button>
+      <h2 style="text-align:center;color:#e91e63;">🏆 冒險完成！</h2>
+      <p style="text-align:center;font-size:3em;">你的得分：${score} 分</p>
+      <button onclick="location.reload()" style="background:#e91e63;color:white;padding:20px 50px;font-size:1.4em;border-radius:20px;">再玩一次 🌟</button>
     `;
     return;
   }
@@ -177,12 +118,10 @@ function nextQuestion() {
 }
 
 function updateProgress() {
-  const percent = ((currentQ) / questions.length) * 100;
+  const percent = Math.min(100, ((currentQ + 1) / questions.length) * 100);
   document.getElementById("progress").style.width = percent + "%";
-  document.getElementById("total").textContent = questions.length * 10;
 }
 
-// 開始遊戲
 renderQuestion();
 </script>
 </body>
